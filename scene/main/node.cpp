@@ -1275,6 +1275,35 @@ void Node::remove_child(Node *p_child) {
 	}
 }
 
+void Node::remove_children() {
+
+	ERR_FAIL_COND_MSG(data.blocked > 0, "Parent node is busy setting up children, remove_node() failed. Consider using call_deferred(\"remove_children\") instead.");
+
+	Node *p_child;
+	int child_count = data.children.size();
+
+	for (int idx = child_count - 1; idx >= 0; idx--)
+	{
+		p_child = data.children.get(idx);
+		p_child->_set_tree(NULL);
+
+		remove_child_notify(p_child);
+		p_child->notification(NOTIFICATION_UNPARENTED);
+
+		data.children.remove(idx);
+
+		p_child->data.parent = NULL;
+		p_child->data.pos = -1;
+
+		// validate owner
+		p_child->_propagate_validate_owner();
+
+		if (data.inside_tree) {
+			p_child->_propagate_after_exit_tree();
+		}
+	}
+}
+
 int Node::get_child_count() const {
 
 	return data.children.size();
@@ -2702,6 +2731,7 @@ void Node::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_name"), &Node::get_name);
 	ClassDB::bind_method(D_METHOD("add_child", "node", "legible_unique_name"), &Node::add_child, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("remove_child", "node"), &Node::remove_child);
+	ClassDB::bind_method(D_METHOD("remove_children"), &Node::remove_children);
 	ClassDB::bind_method(D_METHOD("get_child_count"), &Node::get_child_count);
 	ClassDB::bind_method(D_METHOD("get_children"), &Node::_get_children);
 	ClassDB::bind_method(D_METHOD("get_child", "idx"), &Node::get_child);

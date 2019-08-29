@@ -578,6 +578,13 @@
 				Removes a child node. The node is NOT deleted and must be deleted manually.
 			</description>
 		</method>
+		<method name="remove_children">
+			<return type="void">
+			</return>
+			<description>
+				Removes children nodes. The nodes are NOT deleted and must be deleted manually.
+			</description>
+		</method>
 		<method name="remove_from_group">
 			<return type="void">
 			</return>
